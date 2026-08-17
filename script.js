@@ -116,6 +116,7 @@ function initParticles() {
 // SISTEMA DE DESENHO NA PÁGINA
 // ============================================
 let isDrawing = false;
+let hasDrawn = false;
 let drawingCanvas = null;
 let drawingCtx = null;
 let lastX = 0;
@@ -157,6 +158,25 @@ function initDrawingSystem() {
     document.addEventListener('touchstart', handleTouchStart, { passive: true });
     document.addEventListener('touchmove', handleTouchMove, { passive: true });
     document.addEventListener('touchend', handleDrawingEnd);
+
+    // Botão Limpar Tela
+    const clearBtn = document.getElementById('clear-drawing-btn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            clearCanvas();
+        });
+    }
+}
+
+function clearCanvas() {
+    if (!drawingCanvas || !drawingCtx) return;
+    drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+    hasDrawn = false;
+    const clearBtn = document.getElementById('clear-drawing-btn');
+    if (clearBtn) {
+        clearBtn.classList.remove('visible');
+    }
 }
 
 function isInteractiveTarget(target) {
@@ -164,9 +184,11 @@ function isInteractiveTarget(target) {
     return !!(
         target.closest('.social-button') || 
         target.closest('header') || 
+        target.closest('footer') ||
         target.closest('a') ||
         target.closest('button') ||
         target.closest('.pigeon-btn') ||
+        target.closest('.clear-drawing-btn') ||
         target.closest('#flying-pigeon') ||
         target.closest('#pigeon-easter-egg') ||
         target.closest('#pigeon-hud') ||
@@ -221,6 +243,14 @@ function draw(e) {
     
     lastX = currentX;
     lastY = currentY;
+
+    if (!hasDrawn) {
+        hasDrawn = true;
+        const clearBtn = document.getElementById('clear-drawing-btn');
+        if (clearBtn && !pigeonGameActive) {
+            clearBtn.classList.add('visible');
+        }
+    }
 }
 
 function stopDrawing() {
@@ -347,7 +377,7 @@ function initButtonEffects() {
 }
 
 function initEntranceAnimations() {
-    const elements = document.querySelectorAll('header, .social-links, .pigeon-btn');
+    const elements = document.querySelectorAll('header, .social-links, .pigeon-btn, .portfolio-footer');
     elements.forEach(el => {
         el.style.opacity = '1';
     });
@@ -495,25 +525,16 @@ const SoundFX = {
         if (musicMode === 'off' || !pigeonGameActive) return;
 
         if (musicMode === 'pigeon') {
-            // ==========================================
-            // TEMA OFICIAL: "PEGUE O POMBO" (Volume Baixo e Agradável)
-            // ==========================================
             const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23;
             const G4 = 392.00, A4 = 440.00, B4 = 493.88, C5 = 523.25;
-            const D5 = 587.33, E5 = 659.25, G3 = 196.00, C3 = 130.81;
+            const G3 = 196.00, C3 = 130.81;
 
             const pigeonMelody = [
-                // "Pe-gue o pom-bo, pe-gue o pom-bo..."
                 G4, G4, E4, C4, G4, G4, E4, C4,
-                // "Pe-gue o pom-bo já!"
                 G4, G4, A4, B4, C5, 0, C5, 0,
-                // "Pe-gue o pom-bo, pe-gue o pom-bo..."
                 G4, G4, E4, C4, G4, G4, E4, C4,
-                // "Pren-dam, a-mar-rem, já!"
                 D4, D4, E4, F4, D4, 0, C4, 0,
-                // "Pe-gue o pom-bo, pe-gue o pom-bo..."
                 C4, D4, E4, F4, G4, G4, A4, B4,
-                // "Pe-gue o pom-bo a-go-ra!"
                 C5, C5, B4, A4, G4, F4, E4, D4,
                 C4, E4, G4, C5, 0, 0, 0, 0
             ];
@@ -526,9 +547,8 @@ const SoundFX = {
                 }
                 const freq = pigeonMelody[step % pigeonMelody.length];
                 if (freq > 0) {
-                    SoundFX.playNote(freq, 'triangle', 0.11, 0.025); // Volume baixo suave
+                    SoundFX.playNote(freq, 'triangle', 0.11, 0.025);
                 }
-                // Baixo sutil
                 if (step % 4 === 0) {
                     SoundFX.playNote(step % 8 === 0 ? C3 : G3, 'sine', 0.12, 0.03);
                 }
@@ -536,17 +556,10 @@ const SoundFX = {
             }, 145);
 
         } else if (musicMode === 'chill') {
-            // ==========================================
-            // MÚSICA TRANQUILA / LO-FI CHILL AMBIENT
-            // ==========================================
             const chillNotes = [
-                // Acorde Cmaj7 relaxante
                 261.6, 329.6, 392.0, 493.9, 523.3, 392.0, 329.6, 261.6,
-                // Acorde Am7 relaxante
                 220.0, 261.6, 329.6, 392.0, 440.0, 329.6, 261.6, 220.0,
-                // Acorde Fmaj7 relaxante
                 174.6, 220.0, 261.6, 329.6, 349.2, 261.6, 220.0, 174.6,
-                // Acorde Gsus4
                 196.0, 261.6, 293.7, 392.0, 440.0, 293.7, 261.6, 196.0
             ];
 
@@ -557,7 +570,7 @@ const SoundFX = {
                     return;
                 }
                 const freq = chillNotes[step % chillNotes.length];
-                SoundFX.playNote(freq, 'sine', 0.35, 0.018); // Volume bem baixo e suave
+                SoundFX.playNote(freq, 'sine', 0.35, 0.018);
                 step++;
             }, 240);
         }
@@ -580,7 +593,15 @@ let pigeonAnimation = null;
 let pigeonSpeed = 4.5;
 let pigeonDirection = { x: 1, y: 0.6 };
 let pigeonScore = 0;
-let pigeonHighScore = parseInt(localStorage.getItem('pigeonHighScore') || '0', 10);
+let pigeonHighScore = 0;
+
+try {
+    pigeonHighScore = parseInt(localStorage.getItem('pigeonHighScore') || '0', 10);
+    if (isNaN(pigeonHighScore)) pigeonHighScore = 0;
+} catch (e) {
+    pigeonHighScore = 0;
+}
+
 let pigeonLives = 3;
 let pigeonHud = null;
 let escapeTimeout = null;
@@ -642,7 +663,6 @@ function createPigeonHUD() {
 
     document.body.appendChild(pigeonHud);
 
-    // Botão de alternar música
     const musicBtn = document.getElementById('pigeon-music-btn');
     if (musicBtn) {
         musicBtn.addEventListener('click', (e) => {
@@ -659,7 +679,6 @@ function createPigeonHUD() {
         });
     }
 
-    // Botão de alternar efeitos sonoros
     const sfxBtn = document.getElementById('pigeon-sfx-btn');
     if (sfxBtn) {
         sfxBtn.addEventListener('click', (e) => {
@@ -669,7 +688,6 @@ function createPigeonHUD() {
         });
     }
 
-    // Botão de sair
     const exitBtn = document.getElementById('pigeon-exit-btn');
     if (exitBtn) {
         exitBtn.addEventListener('click', (e) => {
@@ -715,13 +733,17 @@ function startPigeonGame() {
     pigeonSpeed = 4.5;
     pigeonMaxTime = 6000;
     
-    // Oculta os botões e o cabeçalho do portfólio
     document.body.classList.add('pigeon-game-active');
 
     const pigeonBtn = document.getElementById('pigeon-easter-egg');
     if (pigeonBtn) {
         pigeonBtn.style.transform = 'scale(0)';
         setTimeout(() => { pigeonBtn.style.display = 'none'; }, 300);
+    }
+
+    const clearBtn = document.getElementById('clear-drawing-btn');
+    if (clearBtn) {
+        clearBtn.classList.remove('visible');
     }
     
     createPigeonHUD();
@@ -794,7 +816,6 @@ function stopPigeonGame() {
     SoundFX.stopMusic();
     window.removeEventListener('click', handleGameShot);
     
-    // Restaura o cabeçalho e os botões do portfólio
     document.body.classList.remove('pigeon-game-active');
 
     if (pigeonAnimation) {
@@ -821,6 +842,11 @@ function stopPigeonGame() {
         setTimeout(() => {
             pigeonBtn.style.transform = 'scale(1)';
         }, 50);
+    }
+
+    if (hasDrawn) {
+        const clearBtn = document.getElementById('clear-drawing-btn');
+        if (clearBtn) clearBtn.classList.add('visible');
     }
 }
 
@@ -927,7 +953,9 @@ function killPigeon() {
     let isNewRecord = false;
     if (pigeonScore > pigeonHighScore) {
         pigeonHighScore = pigeonScore;
-        localStorage.setItem('pigeonHighScore', pigeonHighScore.toString());
+        try {
+            localStorage.setItem('pigeonHighScore', pigeonHighScore.toString());
+        } catch (e) {}
         isNewRecord = true;
     }
     updatePigeonHUD();
@@ -1155,4 +1183,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initParallax();
     initDrawingSystem();
     initPigeonEasterEgg();
+
+    // Ativa áudio no primeiro clique do usuário
+    const unlockAudio = () => {
+        getAudioContext();
+        document.removeEventListener('click', unlockAudio);
+        document.removeEventListener('touchstart', unlockAudio);
+    };
+    document.addEventListener('click', unlockAudio, { once: true });
+    document.addEventListener('touchstart', unlockAudio, { once: true });
 });

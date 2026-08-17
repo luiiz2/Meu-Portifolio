@@ -361,14 +361,17 @@ body.pigeon-game-active {
 }
 
 body.pigeon-game-active header,
-body.pigeon-game-active .social-links {
+body.pigeon-game-active .social-links,
+body.pigeon-game-active .portfolio-footer,
+body.pigeon-game-active .clear-drawing-btn {
     opacity: 0 !important;
     pointer-events: none !important;
     transform: scale(0.92) translateY(30px) !important;
 }
 
 header,
-.social-links {
+.social-links,
+.portfolio-footer {
     transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), transform 0.45s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
@@ -764,5 +767,98 @@ header,
 
     .pigeon-modal-card {
         padding: 25px 20px;
+    }
+}
+
+/* ============================================
+   RODAPÉ DO PORTFÓLIO
+   ============================================ */
+.portfolio-footer {
+    margin-top: 45px;
+    padding: 15px 20px;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 6000;
+    animation: fadeInUp 1s ease-out 0.4s both;
+}
+
+/* ============================================
+   BOTÃO LIMPAR DESENHO DA TELA
+   ============================================ */
+.clear-drawing-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(20, 20, 25, 0.8);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.85);
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    z-index: 5001;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.clear-drawing-btn.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.clear-drawing-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* ============================================
+   ACESSIBILIDADE E FOCO
+   ============================================ */
+a:focus-visible,
+button:focus-visible {
+    outline: 2px solid #00ffcc;
+    outline-offset: 3px;
+}
+
+/* ============================================
+   BARRA DE ROLAGEM MODERNA
+   ============================================ */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Suporte a Movimento Reduzido */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
 }

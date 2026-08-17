@@ -3,9 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Portfólio de Luiz Artur - Software Developer">
+    <meta name="description" content="Portfólio de Luiz Artur - Software Developer. Conheça meus projetos, perfil do GitHub, LinkedIn e redes de contato.">
     <meta name="author" content="Luiz Artur">
     <meta name="theme-color" content="#050505">
+
+    <!-- Preconnect para carregar Google Fonts com máxima performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <!-- Open Graph / Meta tags para redes sociais e compartilhamento -->
     <meta property="og:type" content="website">
@@ -25,43 +30,46 @@
 </head>
 <body>
     <header>
-        <img id="profile-photo" src="img/foto.jpg" alt="Foto de Luiz Artur">
+        <img id="profile-photo" src="img/foto.jpg" alt="Foto de Luiz Artur" width="180" height="180" loading="eager">
         <h1>Luiz Artur</h1>
-        <h3><span id="texto-digitado"></span><span class="cursor">|</span></h3>
+        <h3><span id="texto-digitado"></span><span class="cursor" aria-hidden="true">|</span></h3>
     </header>
 
-    <div class="social-links">
-        <a href="https://www.linkedin.com/in/luizartur20/" target="_blank" rel="noopener noreferrer" class="social-button">
-            <img src="img/linkedin.png" alt="LinkedIn">
+    <main class="social-links">
+        <a href="https://www.linkedin.com/in/luizartur20/" target="_blank" rel="noopener noreferrer" class="social-button" aria-label="Acessar perfil de Luiz Artur no LinkedIn">
+            <img src="img/linkedin.png" alt="Ícone do LinkedIn" width="28" height="28" loading="lazy">
             <span>LinkedIn</span>
         </a>
         
-        <a href="https://github.com/luiiz2" target="_blank" rel="noopener noreferrer" class="social-button">
-            <img src="img/github.png" alt="GitHub">
+        <a href="https://github.com/luiiz2" target="_blank" rel="noopener noreferrer" class="social-button" aria-label="Acessar repositórios de Luiz Artur no GitHub">
+            <img src="img/github.png" alt="Ícone do GitHub" width="28" height="28" loading="lazy">
             <span>GitHub</span>
         </a>
         
-        <a href="https://www.instagram.com/mluiiz_/" target="_blank" rel="noopener noreferrer" class="social-button">
-            <img src="img/instagram.png" alt="Instagram">
+        <a href="https://www.instagram.com/mluiiz_/" target="_blank" rel="noopener noreferrer" class="social-button" aria-label="Acessar perfil de Luiz Artur no Instagram">
+            <img src="img/instagram.png" alt="Ícone do Instagram" width="28" height="28" loading="lazy">
             <span>Instagram</span>
         </a>
-    </div>
+    </main>
+
+    <footer class="portfolio-footer">
+        <p>© 2026 Luiz Artur • Software Developer</p>
+    </footer>
+
+    <!-- Botão Limpar Desenho (aparece quando o usuário desenha na tela) -->
+    <button id="clear-drawing-btn" class="clear-drawing-btn" title="Limpar riscos da tela" aria-label="Limpar desenhos da tela">
+        🧹 <span>Limpar Tela</span>
+    </button>
     
     <!-- Botão Easter Egg do Pombo -->
-    <button id="pigeon-easter-egg" class="pigeon-btn" title="🐦 Jogar Pegue o Pombo!" aria-label="Mini-game do pombo">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <button id="pigeon-easter-egg" class="pigeon-btn" title="🐦 Jogar Pegue o Pombo!" aria-label="Jogar mini-game Pegue o Pombo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M12 2C8 2 5 5 5 9c0 4 3 7 7 7s7-3 7-7c0-4-3-7-7-7z"/>
             <circle cx="10" cy="9" r="1"/>
             <circle cx="14" cy="9" r="1"/>
             <path d="M8 13c1 2 3 3 4 3s3-1 4-3"/>
         </svg>
     </button>
-    
-    <!-- Áudio para a música "Pegue o Pombo" -->
-    <audio id="pigeon-music" loop preload="auto">
-        <!-- Adicione aqui o arquivo de áudio da música "Pegue o Pombo" -->
-        <!-- Exemplo: <source src="audio/pegue-o-pombo.mp3" type="audio/mpeg"> -->
-    </audio>
     
     <script src="script.js"></script>
 </body>
