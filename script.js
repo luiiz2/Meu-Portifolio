@@ -1027,6 +1027,141 @@ function pigeonEscape() {
     }, 700);
 }
 
+// ============================================
+// SISTEMA DE TABELA DE RECORDES (LEADERBOARD)
+// ============================================
+function getLeaderboard() {
+    try {
+        const data = localStorage.getItem('pigeonLeaderboard');
+        if (!data) return [];
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) {
+            return parsed.sort((a, b) => b.score - a.score);
+        }
+        return [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveLeaderboard(list) {
+    try {
+        localStorage.setItem('pigeonLeaderboard', JSON.stringify(list));
+    } catch (e) {}
+}
+
+function escapeHtml(str) {
+    return (str || '').replace(/[&<>'"]/g, 
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag] || tag)
+    );
+}
+
+function savePlayerScore(rawName, score) {
+    const name = (rawName || '').trim();
+    if (!name) {
+        return { error: 'Por favor, digite seu nome ou apelido!' };
+    }
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    const leaderboard = getLeaderboard();
+    const existingIndex = leaderboard.findIndex(item => item.name.toLowerCase() === name.toLowerCase());
+
+    if (existingIndex !== -1) {
+        const existing = leaderboard[existingIndex];
+        if (score > existing.score) {
+            const oldScore = existing.score;
+            existing.score = score;
+            existing.date = dateStr;
+            existing.name = name; // Mantém a grafia mais recente
+            leaderboard.sort((a, b) => b.score - a.score);
+            saveLeaderboard(leaderboard);
+            const rank = leaderboard.findIndex(item => item.name.toLowerCase() === name.toLowerCase()) + 1;
+            return {
+                status: 'improved',
+                name: existing.name,
+                oldScore: oldScore,
+                newScore: score,
+                rank: rank
+            };
+        } else {
+            return {
+                status: 'not_improved',
+                name: existing.name,
+                oldScore: existing.score,
+                currentScore: score
+            };
+        }
+    } else {
+        leaderboard.push({ name: name, score: score, date: dateStr });
+        leaderboard.sort((a, b) => b.score - a.score);
+        saveLeaderboard(leaderboard);
+        const rank = leaderboard.findIndex(item => item.name.toLowerCase() === name.toLowerCase()) + 1;
+        return {
+            status: 'new_entry',
+            name: name,
+            score: score,
+            rank: rank
+        };
+    }
+}
+
+function renderLeaderboardRows(highlightName = null) {
+    const list = getLeaderboard();
+    if (list.length === 0) {
+        return `<div class="leaderboard-empty">🏆 Nenhum recorde salvo ainda. Seja o primeiro a registrar!</div>`;
+    }
+
+    let rowsHtml = `
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th class="col-rank">#</th>
+                    <th class="col-name">Jogador</th>
+                    <th class="col-score">Pombos</th>
+                    <th class="col-date">Data</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    list.slice(0, 8).forEach((item, index) => {
+        const isCurrent = highlightName && item.name.toLowerCase() === highlightName.toLowerCase();
+        let medal = `${index + 1}º`;
+        if (index === 0) medal = '🥇 1º';
+        else if (index === 1) medal = '🥈 2º';
+        else if (index === 2) medal = '🥉 3º';
+
+        rowsHtml += `
+            <tr class="leaderboard-row ${isCurrent ? 'current-player-row' : ''}">
+                <td class="col-rank">${medal}</td>
+                <td class="col-name"><strong>${escapeHtml(item.name)}</strong></td>
+                <td class="col-score"><span class="score-badge">${item.score}</span></td>
+                <td class="col-date">${item.date || '-'}</td>
+            </tr>
+        `;
+    });
+
+    rowsHtml += `
+            </tbody>
+        </table>
+    `;
+
+    return rowsHtml;
+}
+
 function triggerGameOver() {
     pigeonGameActive = false;
     clearTimers();
@@ -1043,7 +1178,7 @@ function triggerGameOver() {
     modal.id = 'pigeon-gameover-modal';
     modal.className = 'pigeon-modal-overlay';
     modal.innerHTML = `
-        <div class="pigeon-modal-card">
+        <div class="pigeon-modal-card leaderboard-modal">
             <div class="gameover-icon">☠️</div>
             <h2>FIM DE JOGO!</h2>
             <p class="gameover-subtitle">O pombo conseguiu escapar e suas vidas acabaram!</p>
@@ -1054,12 +1189,28 @@ function triggerGameOver() {
                     <span class="stat-value">${pigeonScore}</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">Melhor Recorde</span>
+                    <span class="stat-label">Melhor Recorde Geral</span>
                     <span class="stat-value record">${pigeonHighScore}</span>
                 </div>
             </div>
 
-            ${pigeonScore === pigeonHighScore && pigeonScore > 0 ? '<div class="new-record-tag">🎉 NOVO RECORDE REGISTRADO!</div>' : ''}
+            <!-- Seção de Salvar Nome no Ranking -->
+            <div class="leaderboard-save-box">
+                <label for="player-name-input" class="save-label">Digite seu nome para salvar no Ranking:</label>
+                <div class="save-input-group">
+                    <input type="text" id="player-name-input" placeholder="Seu nome ou apelido..." maxlength="18" autocomplete="off" />
+                    <button id="btn-save-score" class="game-action-btn btn-save" type="button">Salvar 💾</button>
+                </div>
+                <div id="ranking-feedback" class="ranking-feedback"></div>
+            </div>
+
+            <!-- Tabela de Classificação -->
+            <div class="leaderboard-section">
+                <div class="leaderboard-title">🏆 TABELA DE RECORDES</div>
+                <div id="leaderboard-table-container" class="leaderboard-table-container">
+                    ${renderLeaderboardRows()}
+                </div>
+            </div>
 
             <div class="gameover-actions">
                 <button id="btn-replay" class="game-action-btn btn-primary">🔄 Jogar Novamente</button>
@@ -1069,6 +1220,72 @@ function triggerGameOver() {
     `;
 
     document.body.appendChild(modal);
+
+    const nameInput = document.getElementById('player-name-input');
+    const saveBtn = document.getElementById('btn-save-score');
+    const feedbackBox = document.getElementById('ranking-feedback');
+    const tableContainer = document.getElementById('leaderboard-table-container');
+
+    // Recupera o último nome usado
+    try {
+        const lastPlayer = localStorage.getItem('lastPlayerName');
+        if (lastPlayer && nameInput) {
+            nameInput.value = lastPlayer;
+        }
+    } catch (e) {}
+
+    const handleSave = () => {
+        if (!nameInput) return;
+        const enteredName = nameInput.value.trim();
+        if (!enteredName) {
+            feedbackBox.className = 'ranking-feedback feedback-warning';
+            feedbackBox.innerHTML = '⚠️ Por favor, digite seu nome!';
+            nameInput.focus();
+            return;
+        }
+
+        try {
+            localStorage.setItem('lastPlayerName', enteredName);
+        } catch (e) {}
+
+        const result = savePlayerScore(enteredName, pigeonScore);
+
+        if (result.error) {
+            feedbackBox.className = 'ranking-feedback feedback-warning';
+            feedbackBox.innerHTML = `⚠️ ${result.error}`;
+        } else if (result.status === 'improved') {
+            feedbackBox.className = 'ranking-feedback feedback-success';
+            feedbackBox.innerHTML = `🎉 <b>Parabéns, ${escapeHtml(result.name)}!</b> Você superou seu recorde anterior (${result.oldScore} ➔ <b>${result.newScore}</b> pontos)! Ficou em <b>${result.rank}º lugar</b>!`;
+            SoundFX.playHit();
+        } else if (result.status === 'not_improved') {
+            feedbackBox.className = 'ranking-feedback feedback-warning';
+            feedbackBox.innerHTML = `⚠️ <b>${escapeHtml(result.name)}</b>, você <u>não se superou</u>! Seu recorde permanece <b>${result.oldScore} pontos</b>. Nesta rodada você fez ${result.currentScore} pontos.`;
+        } else if (result.status === 'new_entry') {
+            feedbackBox.className = 'ranking-feedback feedback-success';
+            feedbackBox.innerHTML = `✨ <b>${escapeHtml(result.name)}</b> registrado com sucesso! <b>${result.score} pontos</b> (Posição: <b>${result.rank}º lugar</b>).`;
+            SoundFX.playHit();
+        }
+
+        if (tableContainer) {
+            tableContainer.innerHTML = renderLeaderboardRows(enteredName);
+        }
+    };
+
+    if (saveBtn) {
+        saveBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            handleSave();
+        });
+    }
+
+    if (nameInput) {
+        nameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.stopPropagation();
+                handleSave();
+            }
+        });
+    }
 
     document.getElementById('btn-replay').addEventListener('click', (e) => {
         e.stopPropagation();
