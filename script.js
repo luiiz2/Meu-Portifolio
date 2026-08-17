@@ -375,7 +375,8 @@ function initParallax() {
 // MOTOR DE ÁUDIO SINTETIZADO (Web Audio API)
 // ============================================
 let audioCtx = null;
-let soundEnabled = true;
+let sfxEnabled = true;
+let musicMode = 'pigeon'; // 'pigeon' | 'chill' | 'off'
 let musicInterval = null;
 
 function getAudioContext() {
@@ -392,8 +393,8 @@ function getAudioContext() {
 }
 
 const SoundFX = {
-    playNote(freq, type = 'square', duration = 0.1, gainVal = 0.08) {
-        if (!soundEnabled) return;
+    playNote(freq, type = 'square', duration = 0.1, gainVal = 0.035) {
+        if (!freq) return;
         try {
             const ctx = getAudioContext();
             if (!ctx) return;
@@ -411,107 +412,155 @@ const SoundFX = {
     },
 
     playShoot() {
-        if (!soundEnabled) return;
+        if (!sfxEnabled) return;
         try {
             const ctx = getAudioContext();
             if (!ctx) return;
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(800, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.12);
-            gain.gain.setValueAtTime(0.12, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+            osc.frequency.setValueAtTime(750, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.08, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
             osc.connect(gain);
             gain.connect(ctx.destination);
             osc.start();
-            osc.stop(ctx.currentTime + 0.12);
+            osc.stop(ctx.currentTime + 0.1);
         } catch (e) {}
     },
 
     playHit() {
-        if (!soundEnabled) return;
+        if (!sfxEnabled) return;
         try {
             const ctx = getAudioContext();
             if (!ctx) return;
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(250, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.25);
-            gain.gain.setValueAtTime(0.25, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+            osc.frequency.setValueAtTime(280, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.22);
+            gain.gain.setValueAtTime(0.18, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
             osc.connect(gain);
             gain.connect(ctx.destination);
             osc.start();
-            osc.stop(ctx.currentTime + 0.25);
+            osc.stop(ctx.currentTime + 0.22);
             
             setTimeout(() => {
-                SoundFX.playNote(520, 'sine', 0.1, 0.12);
-                setTimeout(() => SoundFX.playNote(390, 'sine', 0.15, 0.12), 60);
-            }, 50);
+                SoundFX.playNote(520, 'sine', 0.1, 0.08);
+                setTimeout(() => SoundFX.playNote(390, 'sine', 0.14, 0.08), 50);
+            }, 40);
         } catch (e) {}
     },
 
     playEscape() {
-        if (!soundEnabled) return;
+        if (!sfxEnabled) return;
         try {
-            // Som cômico de fuga: tom descendente
-            const notes = [450, 400, 350, 280];
+            const notes = [440, 392, 349, 261];
             notes.forEach((freq, idx) => {
-                setTimeout(() => SoundFX.playNote(freq, 'sawtooth', 0.12, 0.1), idx * 80);
+                setTimeout(() => SoundFX.playNote(freq, 'sawtooth', 0.12, 0.07), idx * 75);
             });
         } catch (e) {}
     },
 
     playLoseLife() {
-        if (!soundEnabled) return;
+        if (!sfxEnabled) return;
         try {
-            SoundFX.playNote(220, 'sawtooth', 0.15, 0.15);
-            setTimeout(() => SoundFX.playNote(164.8, 'sawtooth', 0.25, 0.18), 120);
+            SoundFX.playNote(220, 'sawtooth', 0.15, 0.12);
+            setTimeout(() => SoundFX.playNote(164.8, 'sawtooth', 0.22, 0.14), 110);
         } catch (e) {}
     },
 
     playGameOver() {
-        if (!soundEnabled) return;
+        if (!sfxEnabled) return;
         try {
             const notes = [293.7, 277.2, 261.6, 246.9, 196.0];
             notes.forEach((freq, idx) => {
-                setTimeout(() => SoundFX.playNote(freq, 'triangle', 0.25, 0.14), idx * 200);
+                setTimeout(() => SoundFX.playNote(freq, 'triangle', 0.25, 0.1), idx * 190);
             });
         } catch (e) {}
     },
 
     playStart() {
-        if (!soundEnabled) return;
+        if (!sfxEnabled) return;
         const notes = [261.63, 329.63, 392.00, 523.25];
         notes.forEach((freq, idx) => {
-            setTimeout(() => SoundFX.playNote(freq, 'square', 0.12, 0.1), idx * 80);
+            setTimeout(() => SoundFX.playNote(freq, 'square', 0.1, 0.06), idx * 70);
         });
     },
 
-    startRetroMusic() {
+    startBackgroundMusic() {
         if (musicInterval) clearInterval(musicInterval);
-        if (!soundEnabled) return;
+        if (musicMode === 'off' || !pigeonGameActive) return;
 
-        const melody = [
-            261.6, 293.7, 329.6, 392.0, 440.0, 392.0, 329.6, 293.7,
-            349.2, 392.0, 440.0, 523.3, 440.0, 392.0, 349.2, 329.6
-        ];
-        let step = 0;
+        if (musicMode === 'pigeon') {
+            // ==========================================
+            // TEMA OFICIAL: "PEGUE O POMBO" (Volume Baixo e Agradável)
+            // ==========================================
+            const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23;
+            const G4 = 392.00, A4 = 440.00, B4 = 493.88, C5 = 523.25;
+            const D5 = 587.33, E5 = 659.25, G3 = 196.00, C3 = 130.81;
 
-        musicInterval = setInterval(() => {
-            if (!pigeonGameActive || !soundEnabled) {
-                clearInterval(musicInterval);
-                return;
-            }
-            const freq = melody[step % melody.length];
-            SoundFX.playNote(freq, 'triangle', 0.12, 0.04);
-            if (step % 4 === 0) {
-                SoundFX.playNote(130.8, 'square', 0.08, 0.05);
-            }
-            step++;
-        }, 180);
+            const pigeonMelody = [
+                // "Pe-gue o pom-bo, pe-gue o pom-bo..."
+                G4, G4, E4, C4, G4, G4, E4, C4,
+                // "Pe-gue o pom-bo já!"
+                G4, G4, A4, B4, C5, 0, C5, 0,
+                // "Pe-gue o pom-bo, pe-gue o pom-bo..."
+                G4, G4, E4, C4, G4, G4, E4, C4,
+                // "Pren-dam, a-mar-rem, já!"
+                D4, D4, E4, F4, D4, 0, C4, 0,
+                // "Pe-gue o pom-bo, pe-gue o pom-bo..."
+                C4, D4, E4, F4, G4, G4, A4, B4,
+                // "Pe-gue o pom-bo a-go-ra!"
+                C5, C5, B4, A4, G4, F4, E4, D4,
+                C4, E4, G4, C5, 0, 0, 0, 0
+            ];
+
+            let step = 0;
+            musicInterval = setInterval(() => {
+                if (!pigeonGameActive || musicMode !== 'pigeon') {
+                    clearInterval(musicInterval);
+                    return;
+                }
+                const freq = pigeonMelody[step % pigeonMelody.length];
+                if (freq > 0) {
+                    SoundFX.playNote(freq, 'triangle', 0.11, 0.025); // Volume baixo suave
+                }
+                // Baixo sutil
+                if (step % 4 === 0) {
+                    SoundFX.playNote(step % 8 === 0 ? C3 : G3, 'sine', 0.12, 0.03);
+                }
+                step++;
+            }, 145);
+
+        } else if (musicMode === 'chill') {
+            // ==========================================
+            // MÚSICA TRANQUILA / LO-FI CHILL AMBIENT
+            // ==========================================
+            const chillNotes = [
+                // Acorde Cmaj7 relaxante
+                261.6, 329.6, 392.0, 493.9, 523.3, 392.0, 329.6, 261.6,
+                // Acorde Am7 relaxante
+                220.0, 261.6, 329.6, 392.0, 440.0, 329.6, 261.6, 220.0,
+                // Acorde Fmaj7 relaxante
+                174.6, 220.0, 261.6, 329.6, 349.2, 261.6, 220.0, 174.6,
+                // Acorde Gsus4
+                196.0, 261.6, 293.7, 392.0, 440.0, 293.7, 261.6, 196.0
+            ];
+
+            let step = 0;
+            musicInterval = setInterval(() => {
+                if (!pigeonGameActive || musicMode !== 'chill') {
+                    clearInterval(musicInterval);
+                    return;
+                }
+                const freq = chillNotes[step % chillNotes.length];
+                SoundFX.playNote(freq, 'sine', 0.35, 0.018); // Volume bem baixo e suave
+                step++;
+            }, 240);
+        }
     },
 
     stopMusic() {
@@ -523,7 +572,7 @@ const SoundFX = {
 };
 
 // ============================================
-// EASTER EGG: MINIJOGO DO POMBO (COM VIDAS E GAME OVER)
+// EASTER EGG: MINIJOGO DO POMBO
 // ============================================
 let pigeonGameActive = false;
 let pigeonElement = null;
@@ -536,7 +585,7 @@ let pigeonLives = 3;
 let pigeonHud = null;
 let escapeTimeout = null;
 let escapeTimerInterval = null;
-let pigeonMaxTime = 6000; // 6 segundos inicial
+let pigeonMaxTime = 6000;
 let pigeonTimeRemaining = 6000;
 
 function initPigeonEasterEgg() {
@@ -559,13 +608,15 @@ function initPigeonEasterEgg() {
 function getHeartsDisplay(lives) {
     let str = '';
     for (let i = 0; i < 3; i++) {
-        if (i < lives) {
-            str += '❤️';
-        } else {
-            str += '🖤';
-        }
+        str += i < lives ? '❤️' : '🖤';
     }
     return str;
+}
+
+function getMusicModeLabel() {
+    if (musicMode === 'pigeon') return '🎵 Pegue o Pombo';
+    if (musicMode === 'chill') return '🌙 Tranquila';
+    return '🔇 Sem Música';
 }
 
 function createPigeonHUD() {
@@ -583,27 +634,42 @@ function createPigeonHUD() {
             ⏳ <div class="hud-timer-bar"><div id="hud-timer-progress"></div></div>
         </div>
         <div class="hud-controls">
-            <button id="pigeon-mute-btn" class="hud-btn" title="Ligar/Desligar Som">${soundEnabled ? '🔊' : '🔇'}</button>
+            <button id="pigeon-music-btn" class="hud-btn" title="Alternar Música (Pegue o Pombo / Tranquila / Desligada)">${getMusicModeLabel()}</button>
+            <button id="pigeon-sfx-btn" class="hud-btn" title="Ligar/Desligar Efeitos Sonoros">${sfxEnabled ? '🔊 SFX' : '🔇 SFX'}</button>
             <button id="pigeon-exit-btn" class="hud-btn hud-btn-exit" title="Sair do Jogo">✕ Sair</button>
         </div>
     `;
 
     document.body.appendChild(pigeonHud);
 
-    const muteBtn = document.getElementById('pigeon-mute-btn');
-    if (muteBtn) {
-        muteBtn.addEventListener('click', (e) => {
+    // Botão de alternar música
+    const musicBtn = document.getElementById('pigeon-music-btn');
+    if (musicBtn) {
+        musicBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            soundEnabled = !soundEnabled;
-            muteBtn.textContent = soundEnabled ? '🔊' : '🔇';
-            if (soundEnabled && pigeonGameActive) {
-                SoundFX.startRetroMusic();
+            if (musicMode === 'pigeon') {
+                musicMode = 'chill';
+            } else if (musicMode === 'chill') {
+                musicMode = 'off';
             } else {
-                SoundFX.stopMusic();
+                musicMode = 'pigeon';
             }
+            musicBtn.textContent = getMusicModeLabel();
+            SoundFX.startBackgroundMusic();
         });
     }
 
+    // Botão de alternar efeitos sonoros
+    const sfxBtn = document.getElementById('pigeon-sfx-btn');
+    if (sfxBtn) {
+        sfxBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sfxEnabled = !sfxEnabled;
+            sfxBtn.textContent = sfxEnabled ? '🔊 SFX' : '🔇 SFX';
+        });
+    }
+
+    // Botão de sair
     const exitBtn = document.getElementById('pigeon-exit-btn');
     if (exitBtn) {
         exitBtn.addEventListener('click', (e) => {
@@ -639,7 +705,6 @@ function updateTimerProgress(percentage) {
 function startPigeonGame() {
     if (pigeonGameActive) return;
     
-    // Remove modal de game over anterior se existir
     const existingModal = document.getElementById('pigeon-gameover-modal');
     if (existingModal) existingModal.remove();
 
@@ -650,6 +715,7 @@ function startPigeonGame() {
     pigeonSpeed = 4.5;
     pigeonMaxTime = 6000;
     
+    // Oculta os botões e o cabeçalho do portfólio
     document.body.classList.add('pigeon-game-active');
 
     const pigeonBtn = document.getElementById('pigeon-easter-egg');
@@ -660,7 +726,7 @@ function startPigeonGame() {
     
     createPigeonHUD();
     SoundFX.playStart();
-    SoundFX.startRetroMusic();
+    SoundFX.startBackgroundMusic();
     
     showBannerMessage('🎯 PEGUE O POMBO! Não deixe ele fugir!');
     
@@ -727,6 +793,8 @@ function stopPigeonGame() {
     clearTimers();
     SoundFX.stopMusic();
     window.removeEventListener('click', handleGameShot);
+    
+    // Restaura o cabeçalho e os botões do portfólio
     document.body.classList.remove('pigeon-game-active');
 
     if (pigeonAnimation) {
@@ -883,7 +951,6 @@ function killPigeon() {
             pigeonElement = null;
         }
         
-        // Aumenta a velocidade e diminui o tempo limite de fuga
         pigeonSpeed = Math.min(pigeonSpeed + 0.5, 12);
         pigeonMaxTime = Math.max(3200, pigeonMaxTime - 250);
         
@@ -908,11 +975,9 @@ function pigeonEscape() {
     SoundFX.playEscape();
     SoundFX.playLoseLife();
 
-    // Efeito de tela tremendo
     document.body.classList.add('screen-shake');
     setTimeout(() => document.body.classList.remove('screen-shake'), 400);
 
-    // Pombo voa para fora da tela em disparada
     pigeonElement.style.transition = 'transform 0.6s ease-in, top 0.6s ease-in, opacity 0.6s ease-in';
     pigeonElement.style.top = '-150px';
     pigeonElement.style.transform = 'scale(1.5) rotate(-30deg)';

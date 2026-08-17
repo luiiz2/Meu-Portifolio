@@ -360,6 +360,18 @@ body.pigeon-game-active {
     cursor: crosshair !important;
 }
 
+body.pigeon-game-active header,
+body.pigeon-game-active .social-links {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: scale(0.92) translateY(30px) !important;
+}
+
+header,
+.social-links {
+    transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), transform 0.45s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
 /* Pombo voando */
 #flying-pigeon {
     position: fixed;
