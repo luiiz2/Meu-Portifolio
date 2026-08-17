@@ -297,7 +297,7 @@ a {
 }
 
 /* ============================================
-   EASTER EGG: BOTÃO DO POMBO
+   EASTER EGG: BOTÃO DO POMBO & MINIJOGO
    ============================================ */
 .pigeon-btn {
     position: fixed;
@@ -306,27 +306,39 @@ a {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1.5px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.8);
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.9);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 255, 255, 0.05);
     z-index: 10003;
     padding: 0;
     pointer-events: auto;
+    animation: pigeonBtnPulse 3s ease-in-out infinite;
+}
+
+@keyframes pigeonBtnPulse {
+    0%, 100% {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    50% {
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.35);
+    }
 }
 
 .pigeon-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px) scale(1.1);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-3px) scale(1.12);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 255, 255, 0.3);
 }
 
 .pigeon-btn:active {
@@ -336,32 +348,162 @@ a {
 .pigeon-btn svg {
     width: 24px;
     height: 24px;
+    transition: transform 0.3s ease;
+}
+
+.pigeon-btn:hover svg {
+    transform: rotate(12deg) scale(1.1);
+}
+
+/* Modo Jogo Ativo */
+body.pigeon-game-active {
+    cursor: crosshair !important;
 }
 
 /* Pombo voando */
 #flying-pigeon {
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
-    will-change: transform;
-    image-rendering: auto;
+    position: fixed;
+    width: 65px;
+    height: 65px;
+    object-fit: contain;
+    z-index: 10004;
+    cursor: crosshair;
     user-select: none;
     -webkit-user-drag: none;
+    pointer-events: auto;
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
+    will-change: transform, left, top;
+    transition: filter 0.2s ease;
 }
 
 #flying-pigeon:hover {
-    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.9)) scale(1.05);
 }
 
-/* Mensagem de vitória */
-#victory-message {
+/* HUD do Minijogo */
+.pigeon-hud {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 20px;
+    background: rgba(15, 15, 15, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.05);
+    z-index: 10005;
     font-family: 'Poppins', 'Inter', sans-serif;
-    text-align: center;
+    color: #ffffff;
+    font-size: 0.95rem;
+    animation: hudSlideDown 0.4s ease-out;
+}
+
+@keyframes hudSlideDown {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -30px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+.hud-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     white-space: nowrap;
 }
 
-@media (max-width: 480px) {
+.hud-title {
+    font-weight: 600;
+    color: #ffdf70;
+}
+
+.hud-score b, .hud-record b {
+    color: #00ffcc;
+    font-size: 1.1rem;
+}
+
+.hud-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 8px;
+}
+
+.hud-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.hud-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+.hud-btn-exit {
+    background: rgba(255, 70, 70, 0.2);
+    border-color: rgba(255, 70, 70, 0.4);
+    color: #ff8888;
+}
+
+.hud-btn-exit:hover {
+    background: rgba(255, 70, 70, 0.4);
+    color: #ffffff;
+}
+
+/* Mensagem de Banner */
+.pigeon-banner-message {
+    position: fixed;
+    top: 15%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 14px 28px;
+    border-radius: 30px;
+    color: #ffffff;
+    font-size: 1.2rem;
+    font-weight: 600;
+    z-index: 10006;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    animation: bannerPop 0.4s ease-out;
+    transition: all 0.4s ease;
+    white-space: nowrap;
+}
+
+@keyframes bannerPop {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -20%) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@media (max-width: 600px) {
     .pigeon-btn {
-        width: 45px;
-        height: 45px;
+        width: 44px;
+        height: 44px;
         top: 15px;
         right: 15px;
     }
@@ -371,12 +513,28 @@ a {
         height: 20px;
     }
     
+    .pigeon-hud {
+        width: 90%;
+        font-size: 0.8rem;
+        padding: 8px 14px;
+        gap: 10px;
+        justify-content: space-between;
+    }
+
+    .hud-title span {
+        display: none;
+    }
+    
     #flying-pigeon {
         width: 50px !important;
         height: 50px !important;
     }
-    
-    #victory-message {
-        font-size: 2rem !important;
+
+    .pigeon-banner-message {
+        font-size: 0.95rem;
+        padding: 10px 20px;
+        width: 90%;
+        text-align: center;
+        white-space: normal;
     }
 }
