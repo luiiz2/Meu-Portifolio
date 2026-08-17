@@ -423,7 +423,7 @@ function getAudioContext() {
 }
 
 const SoundFX = {
-    playNote(freq, type = 'square', duration = 0.1, gainVal = 0.035) {
+    playNote(freq, type = 'triangle', duration = 0.12, gainVal = 0.05) {
         if (!freq) return;
         try {
             const ctx = getAudioContext();
@@ -449,14 +449,14 @@ const SoundFX = {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(750, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.08, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(800, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.11);
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.11);
             osc.connect(gain);
             gain.connect(ctx.destination);
             osc.start();
-            osc.stop(ctx.currentTime + 0.1);
+            osc.stop(ctx.currentTime + 0.11);
         } catch (e) {}
     },
 
@@ -468,9 +468,9 @@ const SoundFX = {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(280, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.22);
-            gain.gain.setValueAtTime(0.18, ctx.currentTime);
+            osc.frequency.setValueAtTime(320, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.22);
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
             osc.connect(gain);
             gain.connect(ctx.destination);
@@ -478,8 +478,8 @@ const SoundFX = {
             osc.stop(ctx.currentTime + 0.22);
             
             setTimeout(() => {
-                SoundFX.playNote(520, 'sine', 0.1, 0.08);
-                setTimeout(() => SoundFX.playNote(390, 'sine', 0.14, 0.08), 50);
+                SoundFX.playNote(580, 'square', 0.1, 0.08);
+                setTimeout(() => SoundFX.playNote(440, 'square', 0.14, 0.08), 50);
             }, 40);
         } catch (e) {}
     },
@@ -489,7 +489,7 @@ const SoundFX = {
         try {
             const notes = [440, 392, 349, 261];
             notes.forEach((freq, idx) => {
-                setTimeout(() => SoundFX.playNote(freq, 'sawtooth', 0.12, 0.07), idx * 75);
+                setTimeout(() => SoundFX.playNote(freq, 'sawtooth', 0.12, 0.08), idx * 75);
             });
         } catch (e) {}
     },
@@ -497,8 +497,8 @@ const SoundFX = {
     playLoseLife() {
         if (!sfxEnabled) return;
         try {
-            SoundFX.playNote(220, 'sawtooth', 0.15, 0.12);
-            setTimeout(() => SoundFX.playNote(164.8, 'sawtooth', 0.22, 0.14), 110);
+            SoundFX.playNote(220, 'sawtooth', 0.15, 0.14);
+            setTimeout(() => SoundFX.playNote(164.8, 'sawtooth', 0.22, 0.16), 110);
         } catch (e) {}
     },
 
@@ -507,7 +507,7 @@ const SoundFX = {
         try {
             const notes = [293.7, 277.2, 261.6, 246.9, 196.0];
             notes.forEach((freq, idx) => {
-                setTimeout(() => SoundFX.playNote(freq, 'triangle', 0.25, 0.1), idx * 190);
+                setTimeout(() => SoundFX.playNote(freq, 'triangle', 0.25, 0.12), idx * 190);
             });
         } catch (e) {}
     },
@@ -516,7 +516,7 @@ const SoundFX = {
         if (!sfxEnabled) return;
         const notes = [261.63, 329.63, 392.00, 523.25];
         notes.forEach((freq, idx) => {
-            setTimeout(() => SoundFX.playNote(freq, 'square', 0.1, 0.06), idx * 70);
+            setTimeout(() => SoundFX.playNote(freq, 'square', 0.1, 0.08), idx * 70);
         });
     },
 
@@ -527,16 +527,23 @@ const SoundFX = {
         if (musicMode === 'pigeon') {
             const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23;
             const G4 = 392.00, A4 = 440.00, B4 = 493.88, C5 = 523.25;
-            const G3 = 196.00, C3 = 130.81;
+            const D5 = 587.33, E5 = 659.25;
+            const G3 = 196.00, C3 = 130.81, F3 = 174.61, A3 = 220.00;
 
             const pigeonMelody = [
-                G4, G4, E4, C4, G4, G4, E4, C4,
-                G4, G4, A4, B4, C5, 0, C5, 0,
-                G4, G4, E4, C4, G4, G4, E4, C4,
-                D4, D4, E4, F4, D4, 0, C4, 0,
-                C4, D4, E4, F4, G4, G4, A4, B4,
-                C5, C5, B4, A4, G4, F4, E4, D4,
-                C4, E4, G4, C5, 0, 0, 0, 0
+                // "Pe-gue o pom-bo, pe-gue o pom-bo..."
+                G4, G4, E4, C4,   G4, G4, E4, C4,
+                // "Pe-gue o pom-bo já!"
+                G4, G4, A4, B4,   C5, 0,  C5, 0,
+                // "Pe-gue o pom-bo, pe-gue o pom-bo..."
+                G4, G4, E4, C4,   G4, G4, E4, C4,
+                // "Pren-dam, a-mar-rem já!"
+                D4, D4, E4, F4,   D4, 0,  C4, 0,
+                // "Pe-gue o pom-bo, pe-gue o pom-bo..."
+                C4, D4, E4, F4,   G4, G4, A4, B4,
+                // "Pe-gue o pom-bo a-go-ra!"
+                C5, C5, B4, A4,   G4, F4, E4, D4,
+                C4, 0,  E4, G4,   C5, 0,  0,  0
             ];
 
             let step = 0;
@@ -547,13 +554,15 @@ const SoundFX = {
                 }
                 const freq = pigeonMelody[step % pigeonMelody.length];
                 if (freq > 0) {
-                    SoundFX.playNote(freq, 'triangle', 0.11, 0.025);
+                    SoundFX.playNote(freq, 'triangle', 0.12, 0.05);
                 }
                 if (step % 4 === 0) {
-                    SoundFX.playNote(step % 8 === 0 ? C3 : G3, 'sine', 0.12, 0.03);
+                    const bassNotes = [C3, G3, A3, F3];
+                    const bassFreq = bassNotes[Math.floor(step / 8) % bassNotes.length];
+                    SoundFX.playNote(bassFreq, 'sine', 0.14, 0.045);
                 }
                 step++;
-            }, 145);
+            }, 135);
 
         } else if (musicMode === 'chill') {
             const chillNotes = [
@@ -570,7 +579,7 @@ const SoundFX = {
                     return;
                 }
                 const freq = chillNotes[step % chillNotes.length];
-                SoundFX.playNote(freq, 'sine', 0.35, 0.018);
+                SoundFX.playNote(freq, 'sine', 0.35, 0.03);
                 step++;
             }, 240);
         }
@@ -590,7 +599,7 @@ const SoundFX = {
 let pigeonGameActive = false;
 let pigeonElement = null;
 let pigeonAnimation = null;
-let pigeonSpeed = 4.5;
+let pigeonSpeed = 5.0;
 let pigeonDirection = { x: 1, y: 0.6 };
 let pigeonScore = 0;
 let pigeonHighScore = 0;
@@ -730,8 +739,9 @@ function startPigeonGame() {
     pigeonGameActive = true;
     pigeonScore = 0;
     pigeonLives = 3;
-    pigeonSpeed = 4.5;
+    pigeonSpeed = 5.0;
     pigeonMaxTime = 6000;
+    musicMode = 'pigeon';
     
     document.body.classList.add('pigeon-game-active');
 
@@ -899,6 +909,9 @@ function animatePigeon() {
     let currentX = parseFloat(pigeonElement.style.left) || 0;
     let currentY = parseFloat(pigeonElement.style.top) || 0;
     
+    // Aceleração contínua enquanto o pombo voa na tela
+    pigeonSpeed += 0.003;
+
     let newX = currentX + (pigeonDirection.x * pigeonSpeed);
     let newY = currentY + (pigeonDirection.y * pigeonSpeed);
     
@@ -919,8 +932,10 @@ function animatePigeon() {
         newY = window.innerHeight - pigeonHeight - boundMargin;
     }
     
-    if (Math.random() < 0.035) {
-        const randAngle = (Math.random() - 0.5) * 1.3;
+    // Zigue-zague e esquivas mais frequentes conforme a pontuação aumenta
+    const dodgeChance = 0.035 + Math.min(pigeonScore * 0.005, 0.09);
+    if (Math.random() < dodgeChance) {
+        const randAngle = (Math.random() - 0.5) * 1.5;
         const cos = Math.cos(randAngle);
         const sin = Math.sin(randAngle);
         const newDirX = pigeonDirection.x * cos - pigeonDirection.y * sin;
@@ -929,7 +944,8 @@ function animatePigeon() {
         pigeonDirection.y = newDirY;
     }
     
-    const wingFlap = Math.sin(Date.now() / 110) * 12;
+    const flapFreq = Math.max(50, 110 - (pigeonScore * 4));
+    const wingFlap = Math.sin(Date.now() / flapFreq) * 14;
     const scaleX = pigeonDirection.x >= 0 ? 1 : -1;
     
     pigeonElement.style.transform = `scaleX(${scaleX}) rotate(${wingFlap}deg)`;
@@ -979,8 +995,9 @@ function killPigeon() {
             pigeonElement = null;
         }
         
-        pigeonSpeed = Math.min(pigeonSpeed + 0.5, 12);
-        pigeonMaxTime = Math.max(3200, pigeonMaxTime - 250);
+        // Aumenta expressivamente a velocidade a cada pombo abatido
+        pigeonSpeed = 5.0 + (pigeonScore * 1.15);
+        pigeonMaxTime = Math.max(1800, 6000 - (pigeonScore * 280));
         
         if (pigeonGameActive) {
             spawnNextRound();
