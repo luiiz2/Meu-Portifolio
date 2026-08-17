@@ -223,13 +223,7 @@ a {
     51%, 100% { opacity: 0; }
 }
 
-/* Estilos para o cursor personalizado */
-#custom-cursor {
-    /* Removido mix-blend-mode para eliminar efeito de brilho */
-    box-shadow: none !important;
-    text-shadow: none !important;
-    filter: none !important;
-}
+
 
 /* Estilos para o ripple effect */
 .ripple {

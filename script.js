@@ -272,60 +272,7 @@ function handleTouchMove(e) {
     draw({ clientX: touch.clientX, clientY: touch.clientY });
 }
 
-// ============================================
-// CURSOR PERSONALIZADO
-// ============================================
-function initCursorTrail() {
-    if (window.matchMedia('(hover: none)').matches || window.innerWidth <= 768) {
-        return;
-    }
-    
-    const cursor = document.createElement('div');
-    cursor.id = 'custom-cursor';
-    cursor.style.position = 'fixed';
-    cursor.style.width = '18px';
-    cursor.style.height = '18px';
-    cursor.style.border = '2px solid rgba(255, 255, 255, 0.7)';
-    cursor.style.borderRadius = '50%';
-    cursor.style.pointerEvents = 'none';
-    cursor.style.zIndex = '10002';
-    cursor.style.transform = 'translate(-50%, -50%)';
-    cursor.style.transition = 'transform 0.08s ease, border-color 0.2s ease, width 0.2s ease, height 0.2s ease';
-    cursor.style.display = 'none';
-    document.body.appendChild(cursor);
-    
-    let isVisible = false;
-    
-    document.addEventListener('mousemove', (e) => {
-        if (!isVisible) {
-            cursor.style.display = 'block';
-            isVisible = true;
-        }
-        cursor.style.left = e.clientX + 'px';
-        cursor.style.top = e.clientY + 'px';
-
-        const target = document.elementFromPoint(e.clientX, e.clientY);
-        if (target && isInteractiveTarget(target)) {
-            cursor.style.transform = 'translate(-50%, -50%) scale(1.4)';
-            cursor.style.borderColor = 'rgba(255, 255, 255, 1)';
-            cursor.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
-        } else {
-            cursor.style.transform = 'translate(-50%, -50%) scale(1)';
-            cursor.style.borderColor = 'rgba(255, 255, 255, 0.7)';
-            cursor.style.backgroundColor = 'transparent';
-        }
-    });
-    
-    document.addEventListener('mouseenter', () => {
-        cursor.style.display = 'block';
-        isVisible = true;
-    });
-    
-    document.addEventListener('mouseleave', () => {
-        cursor.style.display = 'none';
-        isVisible = false;
-    });
-}
+// Custom cursor removed for clean native mouse performance
 
 // ============================================
 // EFEITOS DE RIPPLE E 3D TILT
@@ -1411,7 +1358,6 @@ function showBannerMessage(text) {
 document.addEventListener('DOMContentLoaded', () => {
     digitar();
     initParticles();
-    initCursorTrail();
     initButtonEffects();
     initEntranceAnimations();
     initParallax();
