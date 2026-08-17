@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Vercel
+.vercel
+
+# IDE / Editor
+.vscode/
+.cursor/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary
+photo_2026-01-15_23-52-27.jpg

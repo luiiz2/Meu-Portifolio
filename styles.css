@@ -21,7 +21,7 @@ body {
     position: relative;
     overflow-x: hidden;
     padding: 20px;
-    cursor: none; /* Esconde o cursor padrão para usar o customizado */
+    cursor: auto; /* Cursor padrão - cursor customizado será adicionado via JS */
 }
 
 body.drawing-mode {
@@ -75,6 +75,7 @@ header {
     height: 180px;
     border-radius: 50%;
     object-fit: cover;
+    object-position: center 20%;
     margin-bottom: 30px;
     border: 3px solid rgba(255, 255, 255, 0.2);
     box-shadow: 
@@ -224,7 +225,10 @@ a {
 
 /* Estilos para o cursor personalizado */
 #custom-cursor {
-    mix-blend-mode: difference;
+    /* Removido mix-blend-mode para eliminar efeito de brilho */
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
 }
 
 /* Estilos para o ripple effect */
@@ -289,5 +293,90 @@ a {
     
     .social-button {
         cursor: pointer;
+    }
+}
+
+/* ============================================
+   EASTER EGG: BOTÃO DO POMBO
+   ============================================ */
+.pigeon-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    z-index: 10003;
+    padding: 0;
+    pointer-events: auto;
+}
+
+.pigeon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px) scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.pigeon-btn:active {
+    transform: translateY(0) scale(0.95);
+}
+
+.pigeon-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Pombo voando */
+#flying-pigeon {
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
+    will-change: transform;
+    image-rendering: auto;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+#flying-pigeon:hover {
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
+}
+
+/* Mensagem de vitória */
+#victory-message {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    text-align: center;
+    white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    .pigeon-btn {
+        width: 45px;
+        height: 45px;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .pigeon-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    #flying-pigeon {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    #victory-message {
+        font-size: 2rem !important;
     }
 }
