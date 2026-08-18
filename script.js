@@ -369,6 +369,20 @@ function getAudioContext() {
     return audioCtx;
 }
 
+let mp3Audio = null;
+
+function getPigeonMp3Audio() {
+    if (!mp3Audio) {
+        mp3Audio = document.getElementById('pegue-pombo-audio');
+        if (!mp3Audio) {
+            mp3Audio = new Audio('pegue-o-pombo.mp3');
+        }
+        mp3Audio.loop = true;
+        mp3Audio.volume = 0.55;
+    }
+    return mp3Audio;
+}
+
 const SoundFX = {
     playNote(freq, type = 'triangle', duration = 0.12, gainVal = 0.05) {
         if (!freq) return;
@@ -468,50 +482,31 @@ const SoundFX = {
     },
 
     startBackgroundMusic() {
-        if (musicInterval) clearInterval(musicInterval);
-        if (musicMode === 'off' || !pigeonGameActive) return;
+        if (musicInterval) {
+            clearInterval(musicInterval);
+            musicInterval = null;
+        }
+
+        const audio = getPigeonMp3Audio();
+
+        if (musicMode === 'off' || !pigeonGameActive) {
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+            return;
+        }
 
         if (musicMode === 'pigeon') {
-            const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23;
-            const G4 = 392.00, A4 = 440.00, B4 = 493.88, C5 = 523.25;
-            const D5 = 587.33, E5 = 659.25;
-            const G3 = 196.00, C3 = 130.81, F3 = 174.61, A3 = 220.00;
-
-            const pigeonMelody = [
-                // "Pe-gue o pom-bo, pe-gue o pom-bo..."
-                G4, G4, E4, C4,   G4, G4, E4, C4,
-                // "Pe-gue o pom-bo já!"
-                G4, G4, A4, B4,   C5, 0,  C5, 0,
-                // "Pe-gue o pom-bo, pe-gue o pom-bo..."
-                G4, G4, E4, C4,   G4, G4, E4, C4,
-                // "Pren-dam, a-mar-rem já!"
-                D4, D4, E4, F4,   D4, 0,  C4, 0,
-                // "Pe-gue o pom-bo, pe-gue o pom-bo..."
-                C4, D4, E4, F4,   G4, G4, A4, B4,
-                // "Pe-gue o pom-bo a-go-ra!"
-                C5, C5, B4, A4,   G4, F4, E4, D4,
-                C4, 0,  E4, G4,   C5, 0,  0,  0
-            ];
-
-            let step = 0;
-            musicInterval = setInterval(() => {
-                if (!pigeonGameActive || musicMode !== 'pigeon') {
-                    clearInterval(musicInterval);
-                    return;
-                }
-                const freq = pigeonMelody[step % pigeonMelody.length];
-                if (freq > 0) {
-                    SoundFX.playNote(freq, 'triangle', 0.12, 0.05);
-                }
-                if (step % 4 === 0) {
-                    const bassNotes = [C3, G3, A3, F3];
-                    const bassFreq = bassNotes[Math.floor(step / 8) % bassNotes.length];
-                    SoundFX.playNote(bassFreq, 'sine', 0.14, 0.045);
-                }
-                step++;
-            }, 135);
-
+            if (audio) {
+                audio.volume = 0.55;
+                audio.currentTime = 0;
+                audio.play().catch(() => {});
+            }
         } else if (musicMode === 'chill') {
+            if (audio) {
+                audio.pause();
+            }
             const chillNotes = [
                 261.6, 329.6, 392.0, 493.9, 523.3, 392.0, 329.6, 261.6,
                 220.0, 261.6, 329.6, 392.0, 440.0, 329.6, 261.6, 220.0,
@@ -536,6 +531,11 @@ const SoundFX = {
         if (musicInterval) {
             clearInterval(musicInterval);
             musicInterval = null;
+        }
+        const audio = getPigeonMp3Audio();
+        if (audio) {
+            audio.pause();
+            audio.currentTime = 0;
         }
     }
 };
@@ -676,6 +676,16 @@ function updateTimerProgress(percentage) {
     }
 }
 
+function calculatePigeonSpeed(score) {
+    // Progressão suave e contínua inspirada no jogo do Dinossauro do Google:
+    // Inicia confortável (3.8) e vai acelerando aos poucos até ficar quase impossível
+    return 3.8 + (score * 0.32) + (Math.pow(score, 1.16) * 0.04);
+}
+
+function calculateMaxTime(score) {
+    return Math.max(2200, 7000 - (score * 120));
+}
+
 function startPigeonGame() {
     if (pigeonGameActive) return;
     
@@ -686,8 +696,8 @@ function startPigeonGame() {
     pigeonGameActive = true;
     pigeonScore = 0;
     pigeonLives = 3;
-    pigeonSpeed = 5.0;
-    pigeonMaxTime = 6000;
+    pigeonSpeed = calculatePigeonSpeed(0);
+    pigeonMaxTime = calculateMaxTime(0);
     musicMode = 'pigeon';
     
     document.body.classList.add('pigeon-game-active');
@@ -856,8 +866,8 @@ function animatePigeon() {
     let currentX = parseFloat(pigeonElement.style.left) || 0;
     let currentY = parseFloat(pigeonElement.style.top) || 0;
     
-    // Aceleração contínua enquanto o pombo voa na tela
-    pigeonSpeed += 0.003;
+    // Aceleração sutil em tempo real durante a rodada
+    pigeonSpeed += 0.0006;
 
     let newX = currentX + (pigeonDirection.x * pigeonSpeed);
     let newY = currentY + (pigeonDirection.y * pigeonSpeed);
@@ -879,10 +889,10 @@ function animatePigeon() {
         newY = window.innerHeight - pigeonHeight - boundMargin;
     }
     
-    // Zigue-zague e esquivas mais frequentes conforme a pontuação aumenta
-    const dodgeChance = 0.035 + Math.min(pigeonScore * 0.005, 0.09);
+    // Desvios e curvas graduais
+    const dodgeChance = 0.025 + Math.min(pigeonScore * 0.002, 0.07);
     if (Math.random() < dodgeChance) {
-        const randAngle = (Math.random() - 0.5) * 1.5;
+        const randAngle = (Math.random() - 0.5) * 1.3;
         const cos = Math.cos(randAngle);
         const sin = Math.sin(randAngle);
         const newDirX = pigeonDirection.x * cos - pigeonDirection.y * sin;
@@ -891,8 +901,8 @@ function animatePigeon() {
         pigeonDirection.y = newDirY;
     }
     
-    const flapFreq = Math.max(50, 110 - (pigeonScore * 4));
-    const wingFlap = Math.sin(Date.now() / flapFreq) * 14;
+    const flapFreq = Math.max(55, 110 - (pigeonScore * 2));
+    const wingFlap = Math.sin(Date.now() / flapFreq) * 12;
     const scaleX = pigeonDirection.x >= 0 ? 1 : -1;
     
     pigeonElement.style.transform = `scaleX(${scaleX}) rotate(${wingFlap}deg)`;
@@ -942,9 +952,9 @@ function killPigeon() {
             pigeonElement = null;
         }
         
-        // Aumenta expressivamente a velocidade a cada pombo abatido
-        pigeonSpeed = 5.0 + (pigeonScore * 1.15);
-        pigeonMaxTime = Math.max(1800, 6000 - (pigeonScore * 280));
+        // Aplica velocidade suave e progressiva (estilo Dino do Google)
+        pigeonSpeed = calculatePigeonSpeed(pigeonScore);
+        pigeonMaxTime = calculateMaxTime(pigeonScore);
         
         if (pigeonGameActive) {
             spawnNextRound();
